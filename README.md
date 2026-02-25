@@ -1,2 +1,12 @@
 # PooII_Proyecto_Taskflow
-Recuento de proceso de proyecto del curso Programación Orientada a Objetos II
+<p>
+###### Integrantes:
+Luisa Builes Roldán
+Yancelly Estefannia Molina Cano
+Jessica Treviño
+<p>
+###### Descripción del proyecto:
+Durante todo el curso estaremos realizando un proyecto incremental en python orientado al uso de TaskFlow
+
+### Primera etapa - Dominio POO
+###### ¿Cómo utilizar?

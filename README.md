@@ -1,4 +1,5 @@
 # TaskFlow
+Proyecto de: Luisa Builes Roldán, Jessica Treviño y Yancelly Estefannia Molina
 
 Sistema básico de gestión de proyectos desarrollado en Python utilizando Programación Orientada a Objetos.
 

@@ -32,7 +32,3 @@ en la carpeta de dominio hay una linea de codigo comentada para validar errores
 ## Requisitos
 
 - Python 3.10+
-
-
-
-

@@ -1,1 +1,3 @@
-# esta etapa no requirio dependencias 
+pytest
+pytest-cov
+behave

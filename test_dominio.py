@@ -3,7 +3,7 @@ from src.domain.tarea import Tarea
 from src.domain.enums import PrioridadTarea
 from src.domain.proyecto import Proyecto
 
-usuario = Usuario("jessica123", "jessica@email.com")
+usuario = Usuario("jessica123", "jessica@gmail.com")
 print(usuario)
 print(repr(usuario))
 print(usuario.email)

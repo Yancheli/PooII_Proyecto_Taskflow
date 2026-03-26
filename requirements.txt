@@ -4,3 +4,5 @@ behave
 fastapi
 uvicorn
 pydantic[email]
+jinja2
+python-multipart

@@ -4,6 +4,10 @@ from api.models import UsuarioCreate
 from fastapi import HTTPException
 from api.models import ProyectoCreate
 from api.models import TareaCreate
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+from fastapi.staticfiles import StaticFiles
+
 
 
 app = FastAPI(
@@ -11,6 +15,10 @@ app = FastAPI(
     description="API para gestión de usuarios, proyectos y tareas",
     version="1.0.0"
 )
+
+templates = Jinja2Templates(directory="templates")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Base de datos temporal (memoria)
 usuarios = []
@@ -87,3 +95,10 @@ def listar_tareas(proyecto_id: int):
             return proyecto["tareas"]
 
     return {"error": "Proyecto no encontrado"}
+
+@app.get("/")
+def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )

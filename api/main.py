@@ -29,16 +29,20 @@ app.include_router(tareas.router)
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html"
+    )
 
 
-# Endpoints
+# Endpoints HTMX
 
 @app.get("/htmx/proyectos", response_class=HTMLResponse)
 def htmx_listar_proyectos(request: Request):
     return templates.TemplateResponse(
-        "proyectos/lista.html",
-        {"request": request, "proyectos": db_proyectos}
+        request=request,
+        name="proyectos/lista.html",
+        context={"proyectos": db_proyectos}
     )
 
 
@@ -61,8 +65,9 @@ def htmx_crear_proyecto(
     }
     db_proyectos.append(nuevo)
     return templates.TemplateResponse(
-        "proyectos/lista.html",
-        {"request": request, "proyectos": db_proyectos}
+        request=request,
+        name="proyectos/lista.html",
+        context={"proyectos": db_proyectos}
     )
 
 
@@ -70,8 +75,9 @@ def htmx_crear_proyecto(
 def htmx_listar_tareas(request: Request, proyecto_id: int):
     proyecto = buscar_proyecto(proyecto_id)
     return templates.TemplateResponse(
-        "tareas/lista.html",
-        {"request": request, "tareas": proyecto.get("tareas", []), "proyecto_id": proyecto_id}
+        request=request,
+        name="tareas/lista.html",
+        context={"tareas": proyecto.get("tareas", []), "proyecto_id": proyecto_id}
     )
 
 
@@ -98,8 +104,9 @@ def htmx_crear_tarea(
     }
     proyecto["tareas"].append(nueva)
     return templates.TemplateResponse(
-        "tareas/lista.html",
-        {"request": request, "tareas": proyecto["tareas"], "proyecto_id": proyecto_id}
+        request=request,
+        name="tareas/lista.html",
+        context={"tareas": proyecto["tareas"], "proyecto_id": proyecto_id}
     )
 
 
@@ -108,8 +115,9 @@ def htmx_completar_tarea(request: Request, tarea_id: int):
     proyecto, tarea = buscar_tarea(tarea_id)
     tarea["estado"] = "completada"
     return templates.TemplateResponse(
-        "tareas/item.html",
-        {"request": request, "tarea": tarea, "proyecto_id": proyecto["id"]}
+        request=request,
+        name="tareas/item.html",
+        context={"tarea": tarea, "proyecto_id": proyecto["id"]}
     )
 
 
@@ -122,6 +130,7 @@ def htmx_cambiar_prioridad(
     proyecto, tarea = buscar_tarea(tarea_id)
     tarea["prioridad"] = prioridad
     return templates.TemplateResponse(
-        "tareas/item.html",
-        {"request": request, "tarea": tarea, "proyecto_id": proyecto["id"]}
+        request=request,
+        name="tareas/item.html",
+        context={"tarea": tarea, "proyecto_id": proyecto["id"]}
     )

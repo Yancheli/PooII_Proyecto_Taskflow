@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+  <style>
+    :root {
+      --tf-bg: #0f1117;
+      --tf-surface: #1a1d27;
+      --tf-card: #20243a;
+      --tf-accent: #6c63ff;
+      --tf-accent2: #00d4aa;
+      --tf-text: #e2e8f0;
+      --tf-muted: #8892a4;
+      --tf-border: #2d3148;
+      --tf-danger: #ff6b6b;
+    }
+
+    body {
+      background-color: var(--tf-bg);
+      color: var(--tf-text);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: var(--tf-surface);
+      border-bottom: 1px solid var(--tf-border);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--tf-accent) !important;
+      letter-spacing: 1px;
+    }
+
+    .card-tf {
+      background: var(--tf-card);
+      border: 1px solid var(--tf-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: box-shadow 0.2s;
+    }
+
+    .card-tf:hover {
+      box-shadow: 0 0 0 1px var(--tf-accent);
+    }
+
+    .btn-accent {
+      background: var(--tf-accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.45rem 1.1rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn-accent:hover { opacity: 0.85; color: #fff; }
+
+    .btn-success-tf {
+      background: var(--tf-accent2);
+      color: #0f1117;
+      border: none;
+      border-radius: 8px;
+      padding: 0.35rem 0.9rem;
+      font-weight: 600;
+      font-size: 0.82rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn-success-tf:hover { opacity: 0.85; }
+
+    .badge-prioridad-ALTA   { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b55; }
+    .badge-prioridad-MEDIA  { background: #ffd93d22; color: #ffd93d; border: 1px solid #ffd93d55; }
+    .badge-prioridad-BAJA   { background: #6bcb7722; color: #6bcb77; border: 1px solid #6bcb7755; }
+    .badge-estado-pendiente    { background: #8892a422; color: #8892a4; border: 1px solid #8892a455; }
+    .badge-estado-en_progreso  { background: #6c63ff22; color: #a09cf7; border: 1px solid #6c63ff55; }
+    .badge-estado-completada   { background: #00d4aa22; color: #00d4aa; border: 1px solid #00d4aa55; }
+
+    .badge-tf {
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .form-control-tf, .form-select-tf {
+      background: var(--tf-surface);
+      border: 1px solid var(--tf-border);
+      color: var(--tf-text);
+      border-radius: 8px;
+    }
+
+    .form-control-tf:focus, .form-select-tf:focus {
+      background: var(--tf-surface);
+      color: var(--tf-text);
+      border-color: var(--tf-accent);
+      box-shadow: 0 0 0 2px #6c63ff33;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--tf-accent);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tarea-completada .tarea-titulo {
+      text-decoration: line-through;
+      color: var(--tf-muted);
+    }
+
+    .error-msg {
+      color: var(--tf-danger);
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+    }
+
+    .htmx-indicator {
+      display: none;
+      color: var(--tf-muted);
+      font-size: 0.82rem;
+    }
+
+    .htmx-request .htmx-indicator { display: inline; }
+
+    select option { background: var(--tf-surface); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar px-4 py-3 mb-4">
+    <span class="navbar-brand"><i class="bi bi-kanban-fill me-2"></i>TaskFlow</span>
+    <span style="color: var(--tf-muted); font-size: 0.85rem;">Gestión de proyectos</span>
+  </nav>
+
+  <div class="container-xl px-4">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>

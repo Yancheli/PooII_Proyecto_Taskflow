@@ -1,0 +1,9 @@
+{% if tareas %}
+  {% for tarea in tareas %}
+    {% include "tareas/item.html" %}
+  {% endfor %}
+{% else %}
+  <p style="color: var(--tf-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+    <i class="bi bi-check2-all me-1"></i>Sin tareas aún.
+  </p>
+{% endif %}

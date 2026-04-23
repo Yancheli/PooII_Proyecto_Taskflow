@@ -1,0 +1,55 @@
+<div id="tarea-{{ tarea.id }}"
+     class="d-flex align-items-center gap-2 py-2 px-1 {% if tarea.estado == 'completada' %}tarea-completada{% endif %}"
+     style="border-bottom: 1px solid var(--tf-border);">
+
+  <!-- Título y estado -->
+  <div class="flex-grow-1">
+    <span class="tarea-titulo" style="font-size: 0.9rem;">{{ tarea.titulo }}</span>
+    {% if tarea.descripcion %}
+      <span style="color: var(--tf-muted); font-size: 0.78rem; margin-left: 6px;">— {{ tarea.descripcion }}</span>
+    {% endif %}
+  </div>
+
+  <!-- estado -->
+  <span class="badge-tf badge-estado-{{ tarea.estado }}" style="white-space:nowrap;">
+    {{ tarea.estado | replace("_", " ") }}
+  </span>
+
+  <!-- prioridad -->
+  <form hx-patch="/htmx/tareas/{{ tarea.id }}/prioridad"
+        hx-target="#tarea-{{ tarea.id }}"
+        hx-swap="outerHTML"
+        hx-trigger="change"
+        hx-indicator="#ind-prior-{{ tarea.id }}">
+    <select name="prioridad"
+            class="form-select form-select-tf"
+            style="font-size: 0.78rem; padding: 0.2rem 0.5rem; width: auto;">
+      <option value="ALTA"  {% if tarea.prioridad == 'ALTA'  %}selected{% endif %}>🔴 Alta</option>
+      <option value="MEDIA" {% if tarea.prioridad == 'MEDIA' %}selected{% endif %}>🟡 Media</option>
+      <option value="BAJA"  {% if tarea.prioridad == 'BAJA'  %}selected{% endif %}>🟢 Baja</option>
+    </select>
+    <span class="htmx-indicator" id="ind-prior-{{ tarea.id }}" style="font-size:0.75rem; color: var(--tf-muted);">
+      <i class="bi bi-arrow-repeat"></i>
+    </span>
+  </form>
+
+  <!-- Botón completar -->
+  {% if tarea.estado != 'completada' %}
+  <button class="btn btn-success-tf"
+          hx-patch="/htmx/tareas/{{ tarea.id }}/completar"
+          hx-target="#tarea-{{ tarea.id }}"
+          hx-swap="outerHTML"
+          hx-trigger="click"
+          hx-indicator="#ind-comp-{{ tarea.id }}">
+    <i class="bi bi-check-lg"></i>
+  </button>
+  <span class="htmx-indicator" id="ind-comp-{{ tarea.id }}" style="font-size:0.75rem; color: var(--tf-muted);">
+    <i class="bi bi-arrow-repeat"></i>
+  </span>
+  {% else %}
+  <span style="color: var(--tf-accent2); font-size: 0.85rem;">
+    <i class="bi bi-check-circle-fill"></i>
+  </span>
+  {% endif %}
+
+</div>

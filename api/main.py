@@ -1,14 +1,14 @@
-from fastapi import FastAPI
-from src.domain.usuario import Usuario
-from api.models import UsuarioCreate
-from fastapi import HTTPException
-from api.models import ProyectoCreate
-from api.models import TareaCreate
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
+# Routes/rutas de cada entidad
+from api.routes import usuarios, proyectos, tareas
 
+# Base de datos compartida 
+from api.database import buscar_proyecto, buscar_tarea
+from api.database import proyectos as db_proyectos
 
 app = FastAPI(
     title="TaskFlow API",
@@ -16,89 +16,112 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# static y templates
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Base de datos temporal (memoria)
-usuarios = []
-proyectos = []
-
-@app.get("/")
-def home():
-    return {"mensaje": "API TaskFlow funcionando correctamente"}
+app.include_router(usuarios.router)
+app.include_router(proyectos.router)
+app.include_router(tareas.router)
 
 
-@app.get("/usuarios")
-def listar_usuarios():
-    return usuarios
+# Página principal
 
-@app.post("/usuarios", status_code=201)
-def crear_usuario(usuario: UsuarioCreate):
-    nuevo_usuario = usuario.dict()
-    nuevo_usuario["id"] = len(usuarios) + 1
-    usuarios.append(nuevo_usuario)
-    return nuevo_usuario
-
-@app.get("/usuarios/{usuario_id}")
-def obtener_usuario(usuario_id: int):
-    for usuario in usuarios:
-        if usuario["id"] == usuario_id:
-            return usuario
-    raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-@app.get("/proyectos")
-def listar_proyectos():
-    return proyectos
-
-@app.post("/proyectos", status_code=201)
-def crear_proyecto(proyecto: ProyectoCreate):
-    nuevo_proyecto = proyecto.dict()
-    nuevo_proyecto["id"] = len(proyectos) + 1
-    proyectos.append(nuevo_proyecto)
-    return nuevo_proyecto
-
-@app.get("/proyectos/{proyecto_id}")
-def obtener_proyecto(proyecto_id: int):
-    for proyecto in proyectos:
-        if proyecto["id"] == proyecto_id:
-            return proyecto
-    return {"error": "Proyecto no encontrado"}
-
-@app.post("/proyectos/{proyecto_id}/tareas", status_code=201)
-def crear_tarea(proyecto_id: int, tarea: TareaCreate):
-
-    for proyecto in proyectos:
-        if proyecto["id"] == proyecto_id:
-
-            if "tareas" not in proyecto:
-                proyecto["tareas"] = []
-
-            nueva_tarea = tarea.dict()
-            nueva_tarea["id"] = len(proyecto["tareas"]) + 1
-
-            proyecto["tareas"].append(nueva_tarea)
-
-            return nueva_tarea
-
-    return {"error": "Proyecto no encontrado"}
-
-@app.get("/proyectos/{proyecto_id}/tareas")
-def listar_tareas(proyecto_id: int):
-
-    for proyecto in proyectos:
-        if proyecto["id"] == proyecto_id:
-
-            if "tareas" not in proyecto:
-                return []
-
-            return proyecto["tareas"]
-
-    return {"error": "Proyecto no encontrado"}
-
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# Endpoints
+
+@app.get("/htmx/proyectos", response_class=HTMLResponse)
+def htmx_listar_proyectos(request: Request):
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
+        "proyectos/lista.html",
+        {"request": request, "proyectos": db_proyectos}
+    )
+
+
+@app.post("/htmx/proyectos", response_class=HTMLResponse)
+def htmx_crear_proyecto(
+    request: Request,
+    nombre: str = Form(...),
+    descripcion: str = Form("")
+):
+    if len(nombre) < 3:
+        return HTMLResponse(
+            "<p class='error-msg'>El nombre debe tener mínimo 3 caracteres.</p>",
+            status_code=422
+        )
+    nuevo = {
+        "id": len(db_proyectos) + 1,
+        "nombre": nombre,
+        "descripcion": descripcion,
+        "tareas": []
+    }
+    db_proyectos.append(nuevo)
+    return templates.TemplateResponse(
+        "proyectos/lista.html",
+        {"request": request, "proyectos": db_proyectos}
+    )
+
+
+@app.get("/htmx/proyectos/{proyecto_id}/tareas", response_class=HTMLResponse)
+def htmx_listar_tareas(request: Request, proyecto_id: int):
+    proyecto = buscar_proyecto(proyecto_id)
+    return templates.TemplateResponse(
+        "tareas/lista.html",
+        {"request": request, "tareas": proyecto.get("tareas", []), "proyecto_id": proyecto_id}
+    )
+
+
+@app.post("/htmx/proyectos/{proyecto_id}/tareas", response_class=HTMLResponse)
+def htmx_crear_tarea(
+    request: Request,
+    proyecto_id: int,
+    titulo: str = Form(...),
+    descripcion: str = Form(""),
+    prioridad: str = Form("MEDIA")
+):
+    if len(titulo) < 3:
+        return HTMLResponse(
+            "<p class='error-msg'>El título debe tener mínimo 3 caracteres.</p>",
+            status_code=422
+        )
+    proyecto = buscar_proyecto(proyecto_id)
+    nueva = {
+        "id": len(proyecto["tareas"]) + 1,
+        "titulo": titulo,
+        "descripcion": descripcion,
+        "prioridad": prioridad,
+        "estado": "pendiente"
+    }
+    proyecto["tareas"].append(nueva)
+    return templates.TemplateResponse(
+        "tareas/lista.html",
+        {"request": request, "tareas": proyecto["tareas"], "proyecto_id": proyecto_id}
+    )
+
+
+@app.patch("/htmx/tareas/{tarea_id}/completar", response_class=HTMLResponse)
+def htmx_completar_tarea(request: Request, tarea_id: int):
+    proyecto, tarea = buscar_tarea(tarea_id)
+    tarea["estado"] = "completada"
+    return templates.TemplateResponse(
+        "tareas/item.html",
+        {"request": request, "tarea": tarea, "proyecto_id": proyecto["id"]}
+    )
+
+
+@app.patch("/htmx/tareas/{tarea_id}/prioridad", response_class=HTMLResponse)
+def htmx_cambiar_prioridad(
+    request: Request,
+    tarea_id: int,
+    prioridad: str = Form(...)
+):
+    proyecto, tarea = buscar_tarea(tarea_id)
+    tarea["prioridad"] = prioridad
+    return templates.TemplateResponse(
+        "tareas/item.html",
+        {"request": request, "tarea": tarea, "proyecto_id": proyecto["id"]}
     )

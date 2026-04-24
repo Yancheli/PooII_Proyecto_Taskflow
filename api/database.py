@@ -1,35 +1,64 @@
+'''
+La base de datos en memoria se reemplaza con una base de datos real, 
+ya no funciona a base de listas como antes
+'''
 
-# Almacén en memoria compartido entre todas las rutas. Archivo propio para mas limpieza
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from fastapi import Depends, HTTPException
+from database.modelsalchemy import Base
 
-from fastapi import HTTPException
+#Conexión 
+DATABASE_URL = (
+    "postgresql+psycopg2://neondb_owner:npg_S2PGonkLJcq1"
+    "@ep-quiet-hall-any02af2-pooler.c-6.us-east-1.aws.neon.tech"
+    "/neondb?sslmode=require"
+ )
 
-# Datos en memoria
-usuarios: list[dict] = []
-proyectos: list[dict] = []
+# Engine de sesiones
 
+engine = create_engine(DATABASE_URL)
+ 
+SessionLocal = sessionmaker(
+    bind=engine,
+    autocommit=False,   
+    autoflush=False,    # No enviar cambios a la BD antes del commit
+)
 
-# Funciones de búsqueda
+# fast api
+def get_db():
+    """
+    Genera una sesión de BD  y la cierra al terminar.
+    Se usa con Depends(get_db) en los endpoints
+    """
+    db: Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-def buscar_usuario(usuario_id: int) -> dict:
-    """Retorna el usuario con ese id o lanza 404."""
-    for u in usuarios:
-        if u["id"] == usuario_id:
-            return u
-    raise HTTPException(status_code=404, detail="Usuario no encontrado")
+# Búsquedas y acciones
 
-
-def buscar_proyecto(proyecto_id: int) -> dict:
-    """Retorna el proyecto con ese id o lanza 404."""
-    for p in proyectos:
-        if p["id"] == proyecto_id:
-            return p
-    raise HTTPException(status_code=404, detail="Proyecto no encontrado")
-
-
-def buscar_tarea(tarea_id: int) -> tuple[dict, dict]:
-    """Retorna (proyecto, tarea) para el tarea_id dado o lanza 404."""
-    for p in proyectos:
-        for t in p.get("tareas", []):
-            if t["id"] == tarea_id:
-                return p, t
-    raise HTTPException(status_code=404, detail="Tarea no encontrada")
+# Importamos los modelos aquí para no repetir la lógica en cada ruta.
+from database.modelsalchemy import Usuario, Proyecto, Tarea, Membresia
+ 
+ 
+def buscar_usuario(usuario_id: int, db: Session) -> Usuario:
+    usuario = db.get(Usuario, usuario_id)
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+ 
+ 
+def buscar_proyecto(proyecto_id: int, db: Session) -> Proyecto:
+    proyecto = db.get(Proyecto, proyecto_id)
+    if not proyecto:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+    return proyecto
+ 
+ 
+def buscar_tarea(tarea_id: int, db: Session) -> Tarea:
+    tarea = db.get(Tarea, tarea_id)
+    if not tarea:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return tarea

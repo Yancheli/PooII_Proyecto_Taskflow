@@ -5,6 +5,32 @@
 
   <!-- Crear proyecto (izquierda) -->
   <div class="col-12 col-lg-4">
+
+    <!-- Crear usuario rápido -->
+    <div class="card-tf mb-3">
+      <div class="section-title"><i class="bi bi-person-plus-fill"></i> Nuevo usuario</div>
+      <form hx-post="/htmx/usuarios"
+            hx-target="#feedback-usuario"
+            hx-swap="innerHTML"
+            hx-on::after-request="if(event.detail.successful){ this.reset(); htmx.trigger('#selector-lider-trigger', 'refresh') }">
+        <div class="mb-2">
+          <input type="text" name="username" required
+                 class="form-control form-control-tf form-control-sm"
+                 placeholder="Username (mín. 3 caracteres, solo letras/números)"/>
+        </div>
+        <div class="mb-2">
+          <input type="email" name="email" required
+                 class="form-control form-control-tf form-control-sm"
+                 placeholder="Email"/>
+        </div>
+        <button type="submit" class="btn btn-accent btn-sm w-100">
+          <i class="bi bi-person-check me-1"></i> Crear usuario
+        </button>
+      </form>
+      <div id="feedback-usuario" class="mt-2" style="font-size:0.82rem;"></div>
+    </div>
+
+    <!-- Crear proyecto -->
     <div class="card-tf">
       <div class="section-title"><i class="bi bi-plus-circle-fill"></i> Nuevo proyecto</div>
 
@@ -24,7 +50,23 @@
                     class="form-control form-control-tf"
                     placeholder="Opcional..."></textarea>
         </div>
-        <button type="submit" class="btn btn-accent w-100">
+        <div class="mb-3">
+          <label class="form-label" style="color: var(--tf-muted); font-size:0.85rem;">Líder *</label>
+          {% if usuarios %}
+            <select name="lider_id" class="form-select form-select-tf" required>
+              {% for u in usuarios %}
+                <option value="{{ u.id }}">@{{ u.username }} — {{ u.email }}</option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <div class="error-msg">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              No hay usuarios. Crea uno primero arriba.
+            </div>
+            <input type="hidden" name="lider_id" value="0"/>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-accent w-100" {% if not usuarios %}disabled{% endif %}>
           <i class="bi bi-send-fill me-1"></i> Crear proyecto
         </button>
         <span class="htmx-indicator ms-2" id="ind-crear">Creando...</span>
@@ -32,7 +74,7 @@
     </div>
   </div>
 
-  <!-- lista de proyectos (derecha) -->
+  <!-- Lista de proyectos (derecha) -->
   <div class="col-12 col-lg-8">
     <div class="section-title">
       <i class="bi bi-folder2-open"></i> Proyectos

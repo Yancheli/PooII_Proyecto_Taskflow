@@ -1,1 +1,38 @@
 '''Aquí están los archivos que NO deben ser subidos al repositorio'''
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# pytest y cobertura
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Variables de entorno y secretos
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Alembic (no ignorar versions/, sí ignorar caché)
+alembic/__pycache__/

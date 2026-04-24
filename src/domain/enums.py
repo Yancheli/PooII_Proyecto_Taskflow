@@ -1,9 +1,9 @@
 from enum import Enum
 
 class PrioridadTarea(Enum):
-    ALTA = 1
-    MEDIA = 2
-    BAJA = 3
+    ALTA = "ALTA"
+    MEDIA = "MEDIA"
+    BAJA = "BAJA"
 
 class EstadoTarea(Enum):
     PENDIENTE = "pendiente"

@@ -1,4 +1,4 @@
-"""agrega columnas faltantes en usuarios y tareas que la api llamaba pero la Base no tenía
+"""agrega columnas faltantes en usuarios y tareas
 
 Revision ID: a1b2c3d4e5f6
 Revises: 73b66aa07473
@@ -7,7 +7,6 @@ Create Date: 2026-04-24 10:00:00.000000
 """
 
 from typing import Sequence, Union
-from datetime import datetime
 
 from alembic import op
 import sqlalchemy as sa
@@ -20,22 +19,20 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # en usuarios: fecha_registro
+    # En usuarios: fecha_registro
     op.add_column(
         "usuarios",
         sa.Column(
             "fecha_registro",
             sa.DateTime(),
             nullable=False,
-            server_default=sa.text("NOW()"),   # valor por defecto
+            server_default=sa.text("NOW()"),
         ),
     )
 
-    # En tareas: prioridad 
-    '''
-    Primero se debe crear el tipo enum para los valores que tenemos'''
+    # En tareas: prioridad
     prioridad_enum = sa.Enum(
-        "1", "2", "3",          
+        "ALTA", "MEDIA", "BAJA",
         name="prioridad_tarea",
     )
     prioridad_enum.create(op.get_bind(), checkfirst=True)
@@ -44,13 +41,13 @@ def upgrade() -> None:
         "tareas",
         sa.Column(
             "prioridad",
-            sa.Enum("1", "2", "3", name="prioridad_tarea"),
+            sa.Enum("ALTA", "MEDIA", "BAJA", name="prioridad_tarea"),
             nullable=False,
-            server_default="2",   
+            server_default="MEDIA",
         ),
     )
 
-    # En tareas: fecha_creación
+    # En tareas: fecha_creacion
     op.add_column(
         "tareas",
         sa.Column(
@@ -73,7 +70,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-#revierte upgrade si se necesita
     op.drop_column("tareas", "fecha_completado")
     op.drop_column("tareas", "fecha_creacion")
     op.drop_column("tareas", "prioridad")

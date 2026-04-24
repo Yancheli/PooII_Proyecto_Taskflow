@@ -50,6 +50,9 @@ README.md
 - test con pytest y por medio de behave
 
 ## Dependencias
+El comando para instalar las dependencias es el siguiente: pip install -r requirements.txt
+Favor de ejecutar antes de probar el programa.
+
 Para hacer los test se utilizaron dependencias tales como:
 - pytest: Sirve para hacer pruebas automáticas al código en Python y comprobar que las funciones y programas funcionan correctamente. 
 
@@ -62,6 +65,8 @@ Para hacer los test se utilizaron dependencias tales como:
 - Uvicorn: Servidor ASGI ligero y rápido que ejecuta aplicaciones como FastAPI. Maneja las peticiones HTTP de forma asíncrona.
 
 - Pydantic[email]: Librería para validación de datos usando tipos de Python; la opción [email] añade validación específica para correos electrónicos.
+
+Con la implementación de las migraciones, el comando para ejecutar alembic es: alembic upgrade head
 
 ## Comandos para los test
 Primero se ejecuta en la terminal "pytest" y despues "pytest --cov=src --cov-report=html --cov-report=term"

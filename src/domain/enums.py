@@ -5,7 +5,7 @@ class PrioridadTarea(Enum):
     MEDIA = "MEDIA"
     BAJA = "BAJA"
 
-class EstadoTarea(Enum):
+class EstadoTarea(Enum):    
     PENDIENTE = "pendiente"
     EN_PROGRESO = "en_progreso"
     COMPLETADA = "completada"

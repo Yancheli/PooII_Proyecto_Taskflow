@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f0f4e8;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .caja {
+      background: white;
+      border: 2px solid #5a8a3c;
+      border-radius: 8px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .titulo {
+      text-align: center;
+      color: #3a6b1f;
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .subtitulo {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #c8d8a8;
+      margin-bottom: 18px;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      color: #777;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab.activo {
+      color: #3a6b1f;
+      font-weight: bold;
+      border-bottom: 3px solid #5a8a3c;
+    }
+    .panel { display: none; }
+    .panel.activo { display: block; }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+    input[type=text], input[type=email], input[type=password] {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #5a8a3c;
+    }
+    .btn-enviar {
+      width: 100%;
+      padding: 9px;
+      background-color: #5a8a3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+    .btn-enviar:hover { background-color: #3a6b1f; }
+    .roles {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .rol-opcion {
+      flex: 1;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .rol-opcion input { display: none; }
+    .rol-opcion.seleccionado {
+      border-color: #5a8a3c;
+      background-color: #eef5e6;
+      color: #3a6b1f;
+      font-weight: bold;
+    }
+    .info-rol {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 6px;
+      padding: 5px 8px;
+      background: #f8faf3;
+      border-left: 3px solid #c8d8a8;
+    }
+    .alerta-error {
+      background: #fdecea;
+      border: 1px solid #f5c6c6;
+      color: #b94040;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+    .alerta-ok {
+      background: #eef5e6;
+      border: 1px solid #a8c880;
+      color: #3a6b1f;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+    .link-abajo {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.82rem;
+      color: #888;
+    }
+    .link-abajo a {
+      color: #5a8a3c;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="caja">
+  <div class="titulo">🌿 TaskFlow</div>
+  <div class="subtitulo">Sistema de gestión de proyectos</div>
+
+  <div class="tabs">
+    <button class="tab {% if reg_success or reg_error %}{% else %}activo{% endif %}"
+            id="tab-login" onclick="cambiarTab('login')">Iniciar sesión</button>
+    <button class="tab {% if reg_success or reg_error %}activo{% endif %}"
+            id="tab-registro" onclick="cambiarTab('registro')">Crear cuenta</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="panel {% if not reg_success and not reg_error %}activo{% endif %}" id="panel-login">
+    {% if error %}
+    <div class="alerta-error">{{ error }}</div>
+    {% endif %}
+    {% if reg_success %}
+    <div class="alerta-ok">{{ reg_success }}</div>
+    {% endif %}
+
+    <form method="POST" action="/login">
+      <label>Username</label>
+      <input type="text" name="username" required placeholder="tu_usuario"/>
+      <label>Contraseña</label>
+      <input type="password" name="password" required placeholder="••••••"/>
+      <button type="submit" class="btn-enviar">Ingresar</button>
+    </form>
+    <div class="link-abajo">
+      ¿No tienes cuenta? <a onclick="cambiarTab('registro')">Créala aquí</a>
+    </div>
+  </div>
+
+  <!-- REGISTRO -->
+  <div class="panel {% if reg_success or reg_error %}activo{% endif %}" id="panel-registro">
+    {% if reg_error %}
+    <div class="alerta-error">{{ reg_error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/register">
+      <label>Username</label>
+      <input type="text" name="username" required placeholder="solo letras y números, mín. 3"/>
+      <label>Email</label>
+      <input type="email" name="email" required placeholder="correo@ejemplo.com"/>
+      <label>Contraseña</label>
+      <input type="password" name="password" required placeholder="mínimo 6 caracteres"/>
+
+      <label>Rol</label>
+      <div class="roles">
+        <label class="rol-opcion" id="opcion-lider" onclick="seleccionarRol('lider')">
+          <input type="radio" name="rol" value="lider" required/>
+          ⭐ Líder
+        </label>
+        <label class="rol-opcion" id="opcion-miembro" onclick="seleccionarRol('miembro')">
+          <input type="radio" name="rol" value="miembro"/>
+          👤 Miembro
+        </label>
+      </div>
+      <div class="info-rol" id="info-rol">Selecciona un rol para continuar.</div>
+
+      <button type="submit" class="btn-enviar">Registrarse</button>
+    </form>
+    <div class="link-abajo">
+      ¿Ya tienes cuenta? <a onclick="cambiarTab('login')">Inicia sesión</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function cambiarTab(tab) {
+    document.getElementById('panel-login').classList.toggle('activo', tab === 'login');
+    document.getElementById('panel-registro').classList.toggle('activo', tab === 'registro');
+    document.getElementById('tab-login').classList.toggle('activo', tab === 'login');
+    document.getElementById('tab-registro').classList.toggle('activo', tab === 'registro');
+  }
+
+  function seleccionarRol(rol) {
+    document.getElementById('opcion-lider').classList.toggle('seleccionado', rol === 'lider');
+    document.getElementById('opcion-miembro').classList.toggle('seleccionado', rol === 'miembro');
+    document.querySelector('input[name="rol"][value="' + rol + '"]').checked = true;
+    var textos = {
+      lider: 'El líder puede crear proyectos.',
+      miembro: 'El miembro puede agregar y completar tareas.'
+    };
+    document.getElementById('info-rol').textContent = textos[rol];
+  }
+</script>
+</body>
+</html>

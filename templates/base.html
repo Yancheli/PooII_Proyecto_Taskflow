@@ -4,154 +4,193 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TaskFlow</title>
-
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
-  <!-- HTMX -->
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-
   <style>
     :root {
-      --tf-bg: #0f1117;
-      --tf-surface: #1a1d27;
-      --tf-card: #20243a;
-      --tf-accent: #6c63ff;
-      --tf-accent2: #00d4aa;
-      --tf-text: #e2e8f0;
-      --tf-muted: #8892a4;
-      --tf-border: #2d3148;
-      --tf-danger: #ff6b6b;
+      --verde:        #5a8a3c;
+      --verde-oscuro: #3a6b1f;
+      --verde-claro:  #eef5e6;
+      --amarillo:     #d4a017;
+      --amarillo-claro: #fdf6e3;
+      --fondo:        #f0f4e8;
+      --borde:        #c8d8a8;
+      --texto:        #333;
+      --muted:        #777;
+      --rojo:         #c0392b;
     }
 
     body {
-      background-color: var(--tf-bg);
-      color: var(--tf-text);
-      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--fondo);
+      color: var(--texto);
+      font-family: Arial, sans-serif;
       min-height: 100vh;
     }
 
     .navbar {
-      background: var(--tf-surface);
-      border-bottom: 1px solid var(--tf-border);
+      background-color: var(--verde-oscuro);
+      padding: 10px 20px;
     }
 
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.4rem;
-      color: var(--tf-accent) !important;
-      letter-spacing: 1px;
+    .navbar-marca {
+      color: white;
+      font-size: 1.3rem;
+      font-weight: bold;
     }
 
-    .card-tf {
-      background: var(--tf-card);
-      border: 1px solid var(--tf-border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      transition: box-shadow 0.2s;
-    }
-
-    .card-tf:hover {
-      box-shadow: 0 0 0 1px var(--tf-accent);
-    }
-
-    .btn-accent {
-      background: var(--tf-accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 0.45rem 1.1rem;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
-
-    .btn-accent:hover { opacity: 0.85; color: #fff; }
-
-    .btn-success-tf {
-      background: var(--tf-accent2);
-      color: #0f1117;
-      border: none;
-      border-radius: 8px;
-      padding: 0.35rem 0.9rem;
-      font-weight: 600;
-      font-size: 0.82rem;
-      transition: opacity 0.2s;
-    }
-
-    .btn-success-tf:hover { opacity: 0.85; }
-
-    .badge-prioridad-ALTA   { background: #ff6b6b22; color: #ff6b6b; border: 1px solid #ff6b6b55; }
-    .badge-prioridad-MEDIA  { background: #ffd93d22; color: #ffd93d; border: 1px solid #ffd93d55; }
-    .badge-prioridad-BAJA   { background: #6bcb7722; color: #6bcb77; border: 1px solid #6bcb7755; }
-    .badge-estado-pendiente    { background: #8892a422; color: #8892a4; border: 1px solid #8892a455; }
-    .badge-estado-en_progreso  { background: #6c63ff22; color: #a09cf7; border: 1px solid #6c63ff55; }
-    .badge-estado-completada   { background: #00d4aa22; color: #00d4aa; border: 1px solid #00d4aa55; }
-
-    .badge-tf {
-      border-radius: 6px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .form-control-tf, .form-select-tf {
-      background: var(--tf-surface);
-      border: 1px solid var(--tf-border);
-      color: var(--tf-text);
-      border-radius: 8px;
-    }
-
-    .form-control-tf:focus, .form-select-tf:focus {
-      background: var(--tf-surface);
-      color: var(--tf-text);
-      border-color: var(--tf-accent);
-      box-shadow: 0 0 0 2px #6c63ff33;
-    }
-
-    .section-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--tf-accent);
-      margin-bottom: 1rem;
+    .info-usuario {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 10px;
     }
 
-    .tarea-completada .tarea-titulo {
-      text-decoration: line-through;
-      color: var(--tf-muted);
+    .badge-rol {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge-lider  { background: var(--amarillo-claro); color: #7a5800; border: 1px solid var(--amarillo); }
+    .badge-miembro { background: var(--verde-claro); color: var(--verde-oscuro); border: 1px solid var(--borde); }
+
+    .nombre-usuario {
+      color: white;
+      font-size: 0.9rem;
     }
 
-    .error-msg {
-      color: var(--tf-danger);
+    .btn-salir {
+      padding: 4px 12px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 4px;
+      color: white;
+      font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .btn-salir:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    .tarjeta {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .titulo-seccion {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--verde-oscuro);
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--borde);
+      padding-bottom: 6px;
+    }
+
+    .btn-verde {
+      background-color: var(--verde);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+    .btn-verde:hover { background-color: var(--verde-oscuro); color: white; }
+
+    .btn-completar {
+      background-color: var(--amarillo);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .btn-completar:hover { background-color: #b8880f; }
+
+    .badge-estado {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .estado-pendiente  { background: #f0e8c8; color: #7a5800; }
+    .estado-en_progreso { background: #d8eaf8; color: #1a4d7a; }
+    .estado-completada  { background: var(--verde-claro); color: var(--verde-oscuro); }
+
+    .badge-prioridad {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+    .prioridad-ALTA  { background: #fde8e8; color: var(--rojo); }
+    .prioridad-MEDIA { background: #fdf6e3; color: #7a5800; }
+    .prioridad-BAJA  { background: var(--verde-claro); color: var(--verde-oscuro); }
+
+    .campo { margin-bottom: 10px; }
+    .campo label { font-size: 0.82rem; color: var(--muted); display: block; margin-bottom: 3px; }
+
+    .input-tf {
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      box-sizing: border-box;
+    }
+    .input-tf:focus { outline: none; border-color: var(--verde); }
+
+    .select-tf {
+      padding: 5px 7px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.83rem;
+      background: white;
+    }
+    .select-tf:focus { outline: none; border-color: var(--verde); }
+
+    .mensaje-error { color: var(--rojo); font-size: 0.82rem; margin-top: 5px; }
+
+    .panel-bloqueado {
+      text-align: center;
+      padding: 20px;
+      border: 1px dashed var(--borde);
+      border-radius: 6px;
+      color: var(--muted);
       font-size: 0.85rem;
-      margin-top: 0.4rem;
     }
 
-    .htmx-indicator {
-      display: none;
-      color: var(--tf-muted);
-      font-size: 0.82rem;
-    }
-
+    .htmx-indicator { display: none; font-size: 0.8rem; color: var(--muted); }
     .htmx-request .htmx-indicator { display: inline; }
 
-    select option { background: var(--tf-surface); }
+    .tarea-completada .titulo-tarea {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
 
-  <nav class="navbar px-4 py-3 mb-4">
-    <span class="navbar-brand"><i class="bi bi-kanban-fill me-2"></i>TaskFlow</span>
-    <span style="color: var(--tf-muted); font-size: 0.85rem;">Gestión de proyectos</span>
-  </nav>
-
-  <div class="container-xl px-4">
-    {% block content %}{% endblock %}
+<nav class="navbar d-flex justify-content-between align-items-center mb-4">
+  <span class="navbar-marca"> TaskFlow</span>
+  {% if current_user %}
+  <div class="info-usuario">
+    <span class="badge-rol {% if current_user.rol.value == 'lider' %}badge-lider{% else %}badge-miembro{% endif %}">
+      {% if current_user.rol.value == 'lider' %}⭐ Líder{% else %}👤 Miembro{% endif %}
+    </span>
+    <span class="nombre-usuario">@{{ current_user.username }}</span>
+    <a href="/logout" class="btn-salir">Cerrar sesión</a>
   </div>
+  {% endif %}
+</nav>
+
+<div class="container-xl px-4">
+  {% block content %}{% endblock %}
+</div>
 
 </body>
 </html>

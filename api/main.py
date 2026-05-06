@@ -13,6 +13,9 @@ from api.auth import get_current_user, get_current_user_optional, require_lider
 from database.modelsalchemy import Proyecto, Tarea, Usuario
 from src.domain.enums import EstadoTarea, RolUsuario
 
+from api.routers.usuario_router import router as usuario_crud_router
+from api.routers.proyecto_router import router as proyecto_crud_router
+from api.routers.tarea_router import router as tarea_crud_router
 
 app = FastAPI(
     title="TaskFlow API",
@@ -28,6 +31,12 @@ app.include_router(auth_router)
 app.include_router(usuarios.router)
 app.include_router(proyectos.router)
 app.include_router(tareas.router)
+
+# Crud de htmx
+app.include_router(usuario_crud_router)
+app.include_router(proyecto_crud_router)
+app.include_router(tarea_crud_router)
+
 
 # Página de inicio
 

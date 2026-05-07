@@ -1,13 +1,15 @@
 from datetime import datetime
 
-from fastapi import FastAPI, Request, Form, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from api.routes import usuarios, proyectos, tareas
 from api.routes.auth import router as auth_router
+from api.routes.jwt_auth_routes import router as jwt_auth_router
 from api.database import get_db, buscar_proyecto, buscar_tarea
 from api.auth import get_current_user, get_current_user_optional, require_lider
 from database.modelsalchemy import Proyecto, Tarea, Usuario
@@ -23,11 +25,84 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# ── Manejadores globales de error ─────────────────────────────────────────────
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Convierte errores de validación de Pydantic (422) en respuestas JSON
+    consistentes. Evita que lleguen como 500 por datos mal formados.
+    """
+    errors = []
+    for error in exc.errors():
+        field = " → ".join(str(loc) for loc in error["loc"] if loc != "body")
+        errors.append({
+            "campo": field or "body",
+            "mensaje": error["msg"],
+        })
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Datos inválidos",
+            "detalle": errors,
+        },
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Formato JSON consistente para todos los errores HTTP
+    (401, 403, 404, 400, etc.).
+    Para rutas HTML (login, index) deja pasar el comportamiento original.
+    """
+    # Si es una redirección (307 al login), dejarla pasar sin tocar
+    if exc.status_code == 307:
+        return RedirectResponse(url=exc.headers.get("Location", "/login"))
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": _http_status_label(exc.status_code),
+            "detalle": exc.detail,
+        },
+        headers=exc.headers if exc.headers else {},
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """
+    Captura cualquier excepción no prevista y devuelve 500 con mensaje
+    genérico — nunca expone el traceback al cliente.
+    """
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Error interno del servidor",
+            "detalle": "Ocurrió un error inesperado. Intenta de nuevo.",
+        },
+    )
+
+
+def _http_status_label(status_code: int) -> str:
+    labels = {
+        400: "Solicitud inválida",
+        401: "No autorizado",
+        403: "Prohibido",
+        404: "No encontrado",
+        409: "Conflicto",
+        422: "Datos inválidos",
+        500: "Error interno del servidor",
+    }
+    return labels.get(status_code, "Error")
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Llamada a los routers
 app.include_router(auth_router)
+app.include_router(jwt_auth_router)          # ← JWT nuevo
 app.include_router(usuarios.router)
 app.include_router(proyectos.router)
 app.include_router(tareas.router)

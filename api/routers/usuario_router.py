@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from api.auth import get_current_user
+from api.jwt_auth import get_current_user_jwt
 from api.database import get_db
 from api.schemas.usuario import UsuarioCreate, UsuarioOut, UsuarioUpdate
 from api.services import usuario_service
@@ -13,24 +13,31 @@ router = APIRouter(prefix="/api/usuarios", tags=["Usuarios CRUD"])
 @router.post("", response_model=UsuarioOut, status_code=201,
              summary="Registrar usuario")
 def registrar(datos: UsuarioCreate, db: Session = Depends(get_db)):
-    """Crea un usuario nuevo. Valida username y email"""
+    """Crea un usuario nuevo. Valida username y email."""
     return usuario_service.registrar_usuario(db, datos)
 
 
 @router.get("", response_model=list[UsuarioOut], summary="Listar usuarios")
-def listar(db: Session = Depends(get_db)):
-    """Devuelve todos los usuarios"""
+def listar(
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_current_user_jwt),
+):
+    """Devuelve todos los usuarios."""
     return usuario_service.listar_usuarios(db)
 
 
 @router.get("/me", response_model=UsuarioOut, summary="Perfil propio")
-def perfil(usuario_actual: Usuario = Depends(get_current_user)):
+def perfil(usuario_actual: Usuario = Depends(get_current_user_jwt)):
     """Devuelve el perfil del usuario autenticado."""
     return usuario_actual
 
 
 @router.get("/{usuario_id}", response_model=UsuarioOut, summary="Obtener usuario")
-def obtener(usuario_id: int, db: Session = Depends(get_db)):
+def obtener(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(get_current_user_jwt),
+):
     """Busca un usuario por ID."""
     return usuario_service.obtener_usuario(db, usuario_id)
 
@@ -40,9 +47,9 @@ def actualizar(
     usuario_id: int,
     datos: UsuarioUpdate,
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_current_user),   # requiere sesión activa
+    _: Usuario = Depends(get_current_user_jwt),
 ):
-    """Actualiza email o activo/inactivo"""
+    """Actualiza email o activo/inactivo."""
     return usuario_service.actualizar_usuario(db, usuario_id, datos)
 
 
@@ -50,7 +57,7 @@ def actualizar(
 def eliminar(
     usuario_id: int,
     db: Session = Depends(get_db),
-    _: Usuario = Depends(get_current_user),
+    _: Usuario = Depends(get_current_user_jwt),
 ):
-    """Elimina un usuario por ID"""
+    """Elimina un usuario por ID."""
     usuario_service.eliminar_usuario(db, usuario_id)
